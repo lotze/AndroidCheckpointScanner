@@ -1,9 +1,9 @@
 package com.thomaslotze.survivedc;
 
 public class RetryFailedRunnerCheckinUploader implements Runnable {
-	SelectCheckpoint mainApp;
+	CheckpointScannerActivity mainApp;
 	
-	public RetryFailedRunnerCheckinUploader(SelectCheckpoint mainApp) {
+	public RetryFailedRunnerCheckinUploader(CheckpointScannerActivity mainApp) {
 		super();
 		this.mainApp = mainApp;
 	}

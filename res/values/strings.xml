@@ -11,4 +11,5 @@
     <string name="Finish">Finish</string>
     <string name="Scan">Scan Barcode</string>
     <string name="DefaultScanText">No scan data loaded yet.</string>
+    <string name="UnknownCheckpoint">Unknown Checkpoint</string>
 </resources>

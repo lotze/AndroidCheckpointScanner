@@ -1,9 +1,7 @@
 package com.thomaslotze.survivedc;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 import org.apache.http.HttpResponse;
@@ -21,23 +19,19 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class SelectCheckpoint extends Activity {
+public class CheckpointScannerActivity extends Activity {
 	String checkpointId = "";
 	String deviceId = "";
 	LocationManager locationManager;
@@ -83,6 +77,12 @@ public class SelectCheckpoint extends Activity {
     	RunnerOpenHelper dbOpenHelper = new RunnerOpenHelper(getApplicationContext());
     	db = dbOpenHelper.getWritableDatabase();
 
+    	updateSummaryText();
+    	
+        //processRunner("crazyrunnerid http://monkey.test?okay","CP Banana",12345);
+    }
+    
+    public void updateSummaryText() {
         String[] columns = {"count(*)", "sum(is_uploaded)"};
         Cursor cursor = db.query("runners", columns, null, null, null, null, null);
         Integer numScans = 0;
@@ -100,9 +100,7 @@ public class SelectCheckpoint extends Activity {
         	new Thread(new RetryFailedRunnerCheckinUploader(this)).start();
         }
         
-        ((TextView) findViewById(R.id.checkpointInfo)).setText(numScans.toString() + " scanned, " + numUploaded.toString() + " uploaded.");
-        
-        processRunner("http://monkey.test?okay","CP Banana",12345);
+        ((TextView) findViewById(R.id.checkpointInfo)).setText(numScans.toString() + " scanned, " + numUploaded.toString() + " uploaded.");    	
     }
 
     public Boolean hasWaitingRunners() {
@@ -118,10 +116,10 @@ public class SelectCheckpoint extends Activity {
         Cursor cursor = db.query("runners", columns, "is_uploaded=0", null, null, null, null);
         if (cursor.moveToFirst()) {
         	do {
-	        	String runnerId = cursor.getString(0);
-	        	String checkpointId = cursor.getString(1);
-	        	Integer timestamp = cursor.getInt(2);
-	        	uploadCheckin(runnerId, checkpointId, timestamp);
+	        	String rId = cursor.getString(0);
+	        	String cpId = cursor.getString(1);
+	        	Integer ts = cursor.getInt(2);
+	        	uploadCheckin(rId, cpId, ts);
         	} while (cursor.moveToNext());
         }
         cursor.close();    	
@@ -129,8 +127,13 @@ public class SelectCheckpoint extends Activity {
     
     public void selectCheckpoint(View view) {
         checkpointId=((Button)view).getText().toString();
+//        processRunner("autoprocess",checkpointId,12345);
+
+//        TextView tv = ((TextView) findViewById(R.id.current_checkpoint));
+//        tv.setText(checkpointId);    	
+
         setContentView(R.layout.scanning);
-        IntentIntegrator.initiateScan(this);
+        IntentIntegrator.initiateScan(CheckpointScannerActivity.this);
     }
     
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -138,25 +141,32 @@ public class SelectCheckpoint extends Activity {
 		if (scan!=null) {
 			//String format = scan.getFormatName();
 			String contents = scan.getContents();
-            processRunner(contents, checkpointId, ((Long)(new Date().getTime())).intValue());
+			if (contents != null) {
+				processRunner(contents, checkpointId, ((Long)(new Date().getTime())).intValue());
+		        // restart barcode scanner
+	            IntentIntegrator.initiateScan(CheckpointScannerActivity.this);
+	        } else  {
+	            // go back to main (checkpoint selection)
+	            setContentView(R.layout.main);
+	        	updateSummaryText();
+			}
             
-	        // restart barcode scanner
-            IntentIntegrator.initiateScan(SelectCheckpoint.this);
         } else  {
             // go back to main (checkpoint selection)
             setContentView(R.layout.main);
+        	updateSummaryText();
         }
 	}
 
 	/**
 	 * Handle successful scan: store in DB and start a background job to upload to the web
 	 * @param runnerId
-	 * @param checkpointId
+	 * @param cpId
 	 * @param timestamp
 	 */
 	public void processRunner(String runnerId, String cpId, int timestamp) {
     	// Store in local DB
-    	ContentValues runnerValues = new ContentValues(3);
+    	ContentValues runnerValues = new ContentValues(4);
     	runnerValues.put("runner_id", runnerId);
     	runnerValues.put("checkpoint_id", cpId);
     	runnerValues.put("timestamp", timestamp);
@@ -181,8 +191,8 @@ public class SelectCheckpoint extends Activity {
 			lonString = ((Double)location.getLongitude()).toString();
 		}
     	String timeString = new Integer(timestamp).toString();
-    	String webServer = "http://thomaslotze.com/survivedc.php";
-    	//String webServer = "http://mime.starset.net/journeylog/log.php";
+    	//String webServer = "http://thomaslotze.com/survivedc.php";
+    	String webServer = "http://mime.starset.net/journeylog/log.php";
 	    String urlString = webServer + "?station=" + java.net.URLEncoder.encode(checkpointId) + "&rid=" + java.net.URLEncoder.encode(runnerId) + "&did=" + java.net.URLEncoder.encode(deviceId) + "&lat=" + java.net.URLEncoder.encode(latString) + "&lon=" + java.net.URLEncoder.encode(lonString) + "&ts=" + java.net.URLEncoder.encode(timeString);
 		HttpClient httpclient = new DefaultHttpClient();
 	    HttpResponse response = null;
@@ -220,7 +230,6 @@ public class SelectCheckpoint extends Activity {
 
 	@Override
 	protected void onStop() {
-		db.close();
 		super.onStop();
 	}
 

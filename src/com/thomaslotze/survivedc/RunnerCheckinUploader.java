@@ -4,10 +4,10 @@ public class RunnerCheckinUploader implements Runnable {
 	String runnerId;
 	String checkpointId;
 	Integer timestamp;
-	SelectCheckpoint mainApp;
+	CheckpointScannerActivity mainApp;
 
 	public RunnerCheckinUploader(String runnerId, String checkpointId,
-			Integer timestamp, SelectCheckpoint mainApp) {
+			Integer timestamp, CheckpointScannerActivity mainApp) {
 		super();
 		this.runnerId = runnerId;
 		this.checkpointId = checkpointId;
