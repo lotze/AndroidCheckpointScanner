@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Delete resource &apos;neural_network_workshop&apos;" deleteContents="true" description="Delete resource &apos;neural_network_workshop&apos;" element1="/neural_network_workshop" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1295990754491"/>
-</session>

@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename resource &apos;sf0monitor/install.rdf&apos; to &apos;spidere.com.install.rdf&apos;" description="Rename resource &apos;install.rdf&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="install.rdf" name="spidere.com.install.rdf" stamp="1297564060251" updateReferences="true"/>
-</session>

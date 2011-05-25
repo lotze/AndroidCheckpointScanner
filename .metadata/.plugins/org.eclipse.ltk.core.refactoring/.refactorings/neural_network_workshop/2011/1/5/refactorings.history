@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename resource &apos;neural_network_workshop/xor.r&apos; to &apos;neural_network_examples.r&apos;" description="Rename resource &apos;xor.r&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="xor.r" name="neural_network_examples.r" stamp="1295988503703" updateReferences="true"/>
-</session>
