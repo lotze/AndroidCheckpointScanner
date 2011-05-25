@@ -1,0 +1,10 @@
+----------------------------------------------------------------
+2011-05-19 22:32:19.875 GMT:
+ Booting Derby version The Apache Software Foundation - Apache Derby - 10.5.3.0 - (802917): instance a816c00e-0130-0a63-53da-ffffbd059f0c
+on database directory /Users/lotze/workspace/.metadata/.plugins/de.walware.statet.r.core/db  
+
+Database Class Loader started - derby.database.classpath=''
+
+2011-05-20 05:34:23.705 GMT:
+Shutting down instance a816c00e-0130-0a63-53da-ffffbd059f0c
+----------------------------------------------------------------

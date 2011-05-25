@@ -1,0 +1,14 @@
+package com.thomaslotze.survivedc;
+
+public class RetryFailedRunnerCheckinUploader implements Runnable {
+	SelectCheckpoint mainApp;
+	
+	@Override
+	public void run() {
+		if (mainApp.hasWaitingRunners()) {
+			mainApp.uploadWaitingRunners();
+		}
+		Thread.sleep(60000);
+	}
+
+}
