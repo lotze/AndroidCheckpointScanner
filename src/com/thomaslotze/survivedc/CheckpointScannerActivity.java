@@ -27,6 +27,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -44,7 +45,9 @@ public class CheckpointScannerActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-                
+        
+        setContentView(R.layout.main);
+
         // get unique phone id from a combination of sources
         final TelephonyManager tm = (TelephonyManager) getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
         final String tmDevice, tmSerial, androidId;
@@ -78,8 +81,11 @@ public class CheckpointScannerActivity extends Activity {
     	db = dbOpenHelper.getWritableDatabase();
 
     	updateSummaryText();
-    	
-        //processRunner("crazyrunnerid http://monkey.test?okay","CP Banana",12345);
+
+//    	String contents = "crazyrunnerid http://monkey.test?okay/RNID23";
+//		String splitContents[] = contents.split("/");
+//		String runnerId = splitContents[splitContents.length-1];
+//        processRunner(runnerId,"CP Banana",12345);
     }
     
     public void updateSummaryText() {
@@ -132,7 +138,6 @@ public class CheckpointScannerActivity extends Activity {
 //        TextView tv = ((TextView) findViewById(R.id.current_checkpoint));
 //        tv.setText(checkpointId);    	
 
-        setContentView(R.layout.scanning);
         IntentIntegrator.initiateScan(CheckpointScannerActivity.this);
     }
     
@@ -142,9 +147,23 @@ public class CheckpointScannerActivity extends Activity {
 			//String format = scan.getFormatName();
 			String contents = scan.getContents();
 			if (contents != null) {
-				processRunner(contents, checkpointId, ((Long)(new Date().getTime())).intValue());
-		        // restart barcode scanner
-	            IntentIntegrator.initiateScan(CheckpointScannerActivity.this);
+				String splitContents[] = contents.split("/");
+				String runnerId = splitContents[splitContents.length-1];
+
+				processRunner(runnerId, checkpointId, ((Long)(new Date().getTime())).intValue());
+				
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							Thread.sleep(1500);
+						} catch (InterruptedException e) {
+						}
+				        // restart barcode scanner
+			            IntentIntegrator.initiateScan(CheckpointScannerActivity.this);
+					}
+					
+				}).start();
 	        } else  {
 	            // go back to main (checkpoint selection)
 	            setContentView(R.layout.main);
@@ -175,8 +194,12 @@ public class CheckpointScannerActivity extends Activity {
     	
     	// asynchronously upload runner check-in
     	new Thread(new RunnerCheckinUploader(runnerId, cpId, timestamp, this)).start();
+    	
+        setContentView(R.layout.completed_scan);
+        ((TextView) findViewById(R.id.scanned_runner_id)).setText(runnerId);
+        ((TextView) findViewById(R.id.scanned_runner_id)).setTextSize(TypedValue.DENSITY_DEFAULT, new Float(90.0));
 	}
-
+	
 	/**
 	 * Try to actually upload this runner check-in to the webserver; update the database if successful
 	 * @param runnerId
@@ -191,8 +214,8 @@ public class CheckpointScannerActivity extends Activity {
 			lonString = ((Double)location.getLongitude()).toString();
 		}
     	String timeString = new Integer(timestamp).toString();
-    	//String webServer = "http://thomaslotze.com/survivedc.php";
-    	String webServer = "http://mime.starset.net/journeylog/log.php";
+    	String webServer = "http://thomaslotze.com/survivedc.php";
+    	//String webServer = "http://mime.starset.net/journeylog/log.php";
 	    String urlString = webServer + "?station=" + java.net.URLEncoder.encode(checkpointId) + "&rid=" + java.net.URLEncoder.encode(runnerId) + "&did=" + java.net.URLEncoder.encode(deviceId) + "&lat=" + java.net.URLEncoder.encode(latString) + "&lon=" + java.net.URLEncoder.encode(lonString) + "&ts=" + java.net.URLEncoder.encode(timeString);
 		HttpClient httpclient = new DefaultHttpClient();
 	    HttpResponse response = null;
