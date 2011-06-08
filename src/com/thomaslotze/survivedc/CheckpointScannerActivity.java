@@ -3,16 +3,19 @@ package com.thomaslotze.survivedc;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie;
@@ -100,11 +103,69 @@ public class CheckpointScannerActivity extends Activity {
 //		String splitContents[] = contents.split("/");
 //		String runnerId = splitContents[splitContents.length-1];
 //        processRunner(runnerId,"CP Banana",12345);
-//        selectCheckpoint("1");
+//		HttpGet httpget = new HttpGet("http://jl.vc/_setcid.php?cid=0");
+//        HttpResponse response;
+//		try {
+//			response = httpClient.execute(httpget);
+//	        HttpEntity entity = response.getEntity();
+//
+//	        if (entity != null) {
+//	            entity.consumeContent();
+//	        }
+//		} catch (ClientProtocolException e) {
+//		} catch (IOException e) {
+//		}
+//		System.out.println("monkey");
+//
+//        
+//		String latString="";
+//		String lonString="";
+//		if (location != null) {
+//			latString = ((Double)location.getLatitude()).toString();
+//			lonString = ((Double)location.getLongitude()).toString();
+//		}
+//		Integer timestamp =  ((Long)(new Date().getTime())).intValue();
+//    	String timeString = new Integer(timestamp).toString();
+//
+//    	
+//    	updateCookie();
+//
+//        String runnerId = "123AB";
+////		String url = "http://jl.vc/123AB";
+//		String url = "http://spidere.com/survivedc/log.cgi";
+//
+//	    String urlString = url + "?cid=" + java.net.URLEncoder.encode(checkpointId) + "&rid=" + java.net.URLEncoder.encode(runnerId) + "&did=" + java.net.URLEncoder.encode(deviceId) + "&lat=" + java.net.URLEncoder.encode(latString) + "&lon=" + java.net.URLEncoder.encode(lonString) + "&ts=" + java.net.URLEncoder.encode(timeString);
+//        HttpPost httppost = new HttpPost(urlString);
+//        try {
+//    	    File photo = new File(Environment.getExternalStorageDirectory(), runnerId + ".jpg");
+//            FileEntity entity = new FileEntity(photo,"binary/octet-stream");
+//            entity.setChunked(true);
+//            httppost.setEntity(entity);
+//            
+//            // Execute HTTP Post Request
+//            response = httpClient.execute(httppost);			   
+//		} catch (ClientProtocolException e) {
+//			// Didn't work -- will hopefully be uploaded later
+//		} catch (IOException e) {
+//			// Didn't work -- will hopefully be uploaded later
+//			System.out.println("monkeys.");
+//		}
+//		System.out.println("monkeys.");
+
+//        selectCheckpoint("1");      
 //        processRunner("runid","1",12345,"http://spidere.com/survivedc/log.cgi");
     }
     
-    public void updateSummaryText() {
+    private void updateCookie() {
+    	// set the cookie in the cookie store, in case the http request failed
+    	BasicClientCookie checkpoint_cookie = new BasicClientCookie("jlog-cid", checkpointId);
+    	checkpoint_cookie.setDomain("jl.vc");
+    	checkpoint_cookie.setPath("/");
+    	checkpoint_cookie.setExpiryDate(new GregorianCalendar(2099, 1, 1).getTime());
+		httpClient.getCookieStore().addCookie(checkpoint_cookie);
+	}
+
+	public void updateSummaryText() {
         String[] columns = {"count(*)", "sum(is_uploaded)"};
         Cursor cursor = db.query("runners", columns, null, null, null, null, null);
         Integer numScans = 0;
@@ -180,9 +241,8 @@ public class CheckpointScannerActivity extends Activity {
         
         setContentView(R.layout.ready_to_scan);
         ((TextView) findViewById(R.id.currentCheckpointConfirmationId)).setText(checkpointId);
-        
-        // set the cookie in the cookie store, in case the http request fails
-        httpClient.getCookieStore().addCookie(new BasicClientCookie("jlog-cid", checkpointId));
+
+        updateCookie();
         
 		new Thread(new Runnable() {
 			@Override
@@ -242,8 +302,7 @@ public class CheckpointScannerActivity extends Activity {
 				Integer timestamp =  ((Long)(new Date().getTime())).intValue();
 		    	String timeString = new Integer(timestamp).toString();
 			    HttpResponse response = null;
-		        // set the cookie in the cookie store, in case the http request failed
-				httpClient.getCookieStore().addCookie(new BasicClientCookie("jlog-cid", checkpointId));
+			    updateCookie();
 
 			    String urlString = url + "?cid=" + java.net.URLEncoder.encode(checkpointId) + "&rid=" + java.net.URLEncoder.encode(runnerId) + "&did=" + java.net.URLEncoder.encode(deviceId) + "&lat=" + java.net.URLEncoder.encode(latString) + "&lon=" + java.net.URLEncoder.encode(lonString) + "&ts=" + java.net.URLEncoder.encode(timeString);
 		        HttpPost httppost = new HttpPost(urlString);
@@ -260,12 +319,8 @@ public class CheckpointScannerActivity extends Activity {
 				} catch (IOException e) {
 					// Didn't work -- will hopefully be uploaded later
 				}
-
-
 		    } else if (resultCode == RESULT_CANCELED) {
-		    	// TODO: set text error message
 		    } else {
-		    	// TODO: set text error message
 		    }
 		    
 			new Thread(new Runnable() {
@@ -408,8 +463,7 @@ public class CheckpointScannerActivity extends Activity {
 	    String urlString = url + "?cid=" + java.net.URLEncoder.encode(checkpointId) + "&rid=" + java.net.URLEncoder.encode(runnerId) + "&did=" + java.net.URLEncoder.encode(deviceId) + "&lat=" + java.net.URLEncoder.encode(latString) + "&lon=" + java.net.URLEncoder.encode(lonString) + "&ts=" + java.net.URLEncoder.encode(timeString);
 	    HttpResponse response = null;
 		try {
-	        // set the cookie in the cookie store, in case the http request failed
-	        httpClient.getCookieStore().addCookie(new BasicClientCookie("jlog-cid", checkpointId));
+			updateCookie();
 
 			response = httpClient.execute(new HttpGet(urlString));
 		    StatusLine statusLine = response.getStatusLine();
