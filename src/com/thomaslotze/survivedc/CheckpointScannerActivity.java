@@ -284,44 +284,51 @@ public class CheckpointScannerActivity extends Activity {
     
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		if (requestCode == CAMERA_CODE) {
+			String runnerId = "RunnerId";
 			
-		    if (resultCode == RESULT_OK) {
-				Bundle extras = getIntent().getExtras();
-				String runnerId = extras.getString("runner id");
-				String url = extras.getString("runner url");
+//		    if (resultCode == RESULT_OK) {
+//				Bundle extras = getIntent().getExtras();
+//				String runnerId = extras.getString("runner id");
+//				String url = extras.getString("runner url");
+//
+//				String splitContents[] = url.split("\\?");
+//				url = splitContents[0];
+//
+//				String latString="";
+//				String lonString="";
+//				if (location != null) {
+//					latString = ((Double)location.getLatitude()).toString();
+//					lonString = ((Double)location.getLongitude()).toString();
+//				}
+//				Integer timestamp =  ((Long)(new Date().getTime())).intValue();
+//		    	String timeString = new Integer(timestamp).toString();
+//			    HttpResponse response = null;
+//			    updateCookie();
+//
+//			    String urlString = url + "?cid=" + java.net.URLEncoder.encode(checkpointId) + "&rid=" + java.net.URLEncoder.encode(runnerId) + "&did=" + java.net.URLEncoder.encode(deviceId) + "&lat=" + java.net.URLEncoder.encode(latString) + "&lon=" + java.net.URLEncoder.encode(lonString) + "&ts=" + java.net.URLEncoder.encode(timeString);
+//		        HttpPost httppost = new HttpPost(urlString);
+//		        try {
+//		    	    File photo = new File(Environment.getExternalStorageDirectory(), runnerId + ".jpg");
+//                    FileEntity entity = new FileEntity(photo,"binary/octet-stream");
+//                    entity.setChunked(true);
+//                    httppost.setEntity(entity);
+//                    
+//		            // Execute HTTP Post Request
+//		            response = httpClient.execute(httppost);			   
+//				} catch (ClientProtocolException e) {
+//					// Didn't work -- will hopefully be uploaded later
+//				} catch (IOException e) {
+//					// Didn't work -- will hopefully be uploaded later
+//				}
+//		    } else if (resultCode == RESULT_CANCELED) {
+//		    } else {
+//		    }
 
-				String splitContents[] = url.split("\\?");
-				url = splitContents[0];
-
-				String latString="";
-				String lonString="";
-				if (location != null) {
-					latString = ((Double)location.getLatitude()).toString();
-					lonString = ((Double)location.getLongitude()).toString();
-				}
-				Integer timestamp =  ((Long)(new Date().getTime())).intValue();
-		    	String timeString = new Integer(timestamp).toString();
-			    HttpResponse response = null;
-			    updateCookie();
-
-			    String urlString = url + "?cid=" + java.net.URLEncoder.encode(checkpointId) + "&rid=" + java.net.URLEncoder.encode(runnerId) + "&did=" + java.net.URLEncoder.encode(deviceId) + "&lat=" + java.net.URLEncoder.encode(latString) + "&lon=" + java.net.URLEncoder.encode(lonString) + "&ts=" + java.net.URLEncoder.encode(timeString);
-		        HttpPost httppost = new HttpPost(urlString);
-		        try {
-		    	    File photo = new File(Environment.getExternalStorageDirectory(), runnerId + ".jpg");
-                    FileEntity entity = new FileEntity(photo,"binary/octet-stream");
-                    entity.setChunked(true);
-                    httppost.setEntity(entity);
-                    
-		            // Execute HTTP Post Request
-		            response = httpClient.execute(httppost);			   
-				} catch (ClientProtocolException e) {
-					// Didn't work -- will hopefully be uploaded later
-				} catch (IOException e) {
-					// Didn't work -- will hopefully be uploaded later
-				}
-		    } else if (resultCode == RESULT_CANCELED) {
-		    } else {
-		    }
+	        setContentView(R.layout.completed_scan);
+	        ((TextView) findViewById(R.id.scanned_runner_id)).setText(runnerId);
+	        ((TextView) findViewById(R.id.scanned_runner_id)).setTextSize(TypedValue.DENSITY_DEFAULT, new Float(90.0));
+	        ((TextView) findViewById(R.id.checkpoint_id)).setText("Picture Taken");
+	        ((TextView) findViewById(R.id.checkpoint_id)).setTextSize(TypedValue.DENSITY_DEFAULT, new Float(90.0));
 		    
 			new Thread(new Runnable() {
 				@Override
