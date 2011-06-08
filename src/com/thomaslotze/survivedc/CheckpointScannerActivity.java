@@ -156,7 +156,7 @@ public class CheckpointScannerActivity extends Activity {
 					@Override
 					public void run() {
 						try {
-							Thread.sleep(1500);
+							Thread.sleep(500);
 						} catch (InterruptedException e) {
 						}
 				        // restart barcode scanner
@@ -198,6 +198,8 @@ public class CheckpointScannerActivity extends Activity {
         setContentView(R.layout.completed_scan);
         ((TextView) findViewById(R.id.scanned_runner_id)).setText(runnerId);
         ((TextView) findViewById(R.id.scanned_runner_id)).setTextSize(TypedValue.DENSITY_DEFAULT, new Float(90.0));
+        ((TextView) findViewById(R.id.checkpoint_id)).setText(cpId);
+        ((TextView) findViewById(R.id.checkpoint_id)).setTextSize(TypedValue.DENSITY_DEFAULT, new Float(90.0));
 	}
 	
 	/**
