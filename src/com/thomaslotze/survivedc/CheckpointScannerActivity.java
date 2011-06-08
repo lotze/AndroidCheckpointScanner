@@ -15,7 +15,6 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie;
@@ -51,6 +50,8 @@ public class CheckpointScannerActivity extends Activity {
 	SQLiteDatabase db = null;
 	Pattern cpFinder = Pattern.compile(".*\\bcid=([^&]*)");
 	DefaultHttpClient httpClient = new DefaultHttpClient();
+	private String cameraStoredRunnerId;
+	private String cameraStoredUrl;
 	
 	private static final int CAMERA_CODE = 0;
 
@@ -151,6 +152,10 @@ public class CheckpointScannerActivity extends Activity {
 //			System.out.println("monkeys.");
 //		}
 //		System.out.println("monkeys.");
+
+//        checkpointId = "0";
+//        updateCookie();
+//		processRegistration("123AB", ((Long)(new Date().getTime())).intValue(), "http://spidere.com/survivedc/log.cgi");
 
 //        selectCheckpoint("1");      
 //        processRunner("runid","1",12345,"http://spidere.com/survivedc/log.cgi");
@@ -283,46 +288,51 @@ public class CheckpointScannerActivity extends Activity {
 
     
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		if (requestCode == CAMERA_CODE) {
-			String runnerId = "RunnerId";
-			
-//		    if (resultCode == RESULT_OK) {
-//				Bundle extras = getIntent().getExtras();
-//				String runnerId = extras.getString("runner id");
-//				String url = extras.getString("runner url");
-//
-//				String splitContents[] = url.split("\\?");
-//				url = splitContents[0];
-//
-//				String latString="";
-//				String lonString="";
-//				if (location != null) {
-//					latString = ((Double)location.getLatitude()).toString();
-//					lonString = ((Double)location.getLongitude()).toString();
-//				}
-//				Integer timestamp =  ((Long)(new Date().getTime())).intValue();
-//		    	String timeString = new Integer(timestamp).toString();
-//			    HttpResponse response = null;
-//			    updateCookie();
-//
-//			    String urlString = url + "?cid=" + java.net.URLEncoder.encode(checkpointId) + "&rid=" + java.net.URLEncoder.encode(runnerId) + "&did=" + java.net.URLEncoder.encode(deviceId) + "&lat=" + java.net.URLEncoder.encode(latString) + "&lon=" + java.net.URLEncoder.encode(lonString) + "&ts=" + java.net.URLEncoder.encode(timeString);
-//		        HttpPost httppost = new HttpPost(urlString);
-//		        try {
-//		    	    File photo = new File(Environment.getExternalStorageDirectory(), runnerId + ".jpg");
-//                    FileEntity entity = new FileEntity(photo,"binary/octet-stream");
-//                    entity.setChunked(true);
-//                    httppost.setEntity(entity);
-//                    
-//		            // Execute HTTP Post Request
-//		            response = httpClient.execute(httppost);			   
-//				} catch (ClientProtocolException e) {
-//					// Didn't work -- will hopefully be uploaded later
-//				} catch (IOException e) {
-//					// Didn't work -- will hopefully be uploaded later
-//				}
-//		    } else if (resultCode == RESULT_CANCELED) {
-//		    } else {
-//		    }
+		String runnerId = cameraStoredRunnerId;
+		String url = cameraStoredUrl;
+		
+		if (requestCode == CAMERA_CODE) {			
+		    if (resultCode == RESULT_OK) {
+		    	if (intent != null) {
+					Bundle extras = intent.getExtras();
+					runnerId = extras.getString("runner id");
+					url = extras.getString("runner url");
+		    	}
+
+				String splitContents[] = url.split("\\?");
+				url = splitContents[0];
+
+				String latString="";
+				String lonString="";
+				if (location != null) {
+					latString = ((Double)location.getLatitude()).toString();
+					lonString = ((Double)location.getLongitude()).toString();
+				}
+				Integer timestamp =  ((Long)(new Date().getTime())).intValue();
+		    	String timeString = new Integer(timestamp).toString();
+			    HttpResponse response = null;
+			    updateCookie();
+
+			    String urlString = url + "?cid=" + java.net.URLEncoder.encode(checkpointId) + "&rid=" + java.net.URLEncoder.encode(runnerId) + "&did=" + java.net.URLEncoder.encode(deviceId) + "&lat=" + java.net.URLEncoder.encode(latString) + "&lon=" + java.net.URLEncoder.encode(lonString) + "&ts=" + java.net.URLEncoder.encode(timeString);
+		        HttpPost httppost = new HttpPost(urlString);
+		        try {
+		    	    File photo = new File(Environment.getExternalStorageDirectory(), runnerId + ".jpg");
+                    FileEntity entity = new FileEntity(photo,"binary/octet-stream");
+                    entity.setChunked(true);
+                    httppost.setEntity(entity);
+                    
+		            // Execute HTTP Post Request
+		            response = httpClient.execute(httppost);			   
+				} catch (ClientProtocolException e) {
+					// Didn't work -- will hopefully be uploaded later
+				} catch (IOException e) {
+					// Didn't work -- will hopefully be uploaded later
+				} catch (Exception e) {
+					// didn't work
+				}
+		    } else if (resultCode == RESULT_CANCELED) {
+		    } else {
+		    }
 
 	        setContentView(R.layout.completed_scan);
 	        ((TextView) findViewById(R.id.scanned_runner_id)).setText(runnerId);
@@ -359,7 +369,7 @@ public class CheckpointScannerActivity extends Activity {
 					} else {				
 						// otherwise, we assume it's a runner id				
 						String splitContents[] = contents.split("/");
-						String runnerId = splitContents[splitContents.length-1];
+						runnerId = splitContents[splitContents.length-1];
 						
 						// if we're checkpoint 0, get a photo and upload it in the background
 						if (checkpointId.equals("0")) {
@@ -401,6 +411,9 @@ public class CheckpointScannerActivity extends Activity {
 	}
 
 	private void processRegistration(String runnerId, int timestamp, String url) {
+		// in the background, process the runner's login
+    	new Thread(new RunnerCheckinUploader(runnerId, "0", timestamp, url, this)).start();
+		
 		// Take a picture, which will upload the result to the webserver in the background; then go back to scanning
 		//define the file-name to save photo taken by Camera activity
 		String fileName = runnerId + ".jpg";
@@ -416,6 +429,8 @@ public class CheckpointScannerActivity extends Activity {
 		intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
 		intent.putExtra("runner url", url);
 		intent.putExtra("runner id", runnerId);
+		cameraStoredRunnerId = runnerId;
+		cameraStoredUrl = url;
 
 		startActivityForResult(intent, CAMERA_CODE);
 	}
