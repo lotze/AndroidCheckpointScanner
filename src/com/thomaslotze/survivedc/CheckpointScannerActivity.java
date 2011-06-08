@@ -97,7 +97,7 @@ public class CheckpointScannerActivity extends Activity {
         };
         // Register the listener with the Location Manager to receive location updates
         //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-        //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
 //    	String contents = "crazyrunnerid http://monkey.test?okay/RNID23";
 //		String splitContents[] = contents.split("/");
@@ -511,7 +511,7 @@ public class CheckpointScannerActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		//locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 300000, 100, locationListener);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 300000, 100, locationListener);
 	}
 	
 	// Helper class for DB management
