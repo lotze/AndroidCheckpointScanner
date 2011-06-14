@@ -3,5 +3,9 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry kind="lib" path="/Users/lotze/projects/AndroidCheckpointScanner/assets/apache-mime4j-0.6.1.jar"/>
+	<classpathentry kind="lib" path="/Users/lotze/projects/AndroidCheckpointScanner/assets/httpclient-4.1.1.jar"/>
+	<classpathentry kind="lib" path="/Users/lotze/projects/AndroidCheckpointScanner/assets/httpcore-4.1.jar"/>
+	<classpathentry kind="lib" path="/Users/lotze/projects/AndroidCheckpointScanner/assets/httpmime-4.1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
